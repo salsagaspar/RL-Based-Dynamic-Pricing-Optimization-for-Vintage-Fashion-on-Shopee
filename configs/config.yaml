@@ -1,0 +1,51 @@
+# Configuration for RL-Based Dynamic Pricing Optimization
+# Domain: Vintage Fashion 90s on Shopee
+
+data:
+  raw_file: "data/raw/dataset_supply_chain_pakaian_90an_shopee.xlsx"
+  processed_dir: "data/processed"
+  sheets:
+    products: "Produk_Master"
+    suppliers: "Pemasok"
+    purchases: "Pembelian"
+    orders: "Pesanan"
+    returns: "Retur"
+    inventory: "Persediaan"
+
+platform:
+  name: "Shopee"
+  category: "Pakaian Vintage 90an"
+  fee_rates:
+    admin_fee_pct: 0.045         # 4.5% Shopee Star Seller fashion admin fee
+    free_shipping_fee_pct: 0.035 # 3.5% Gratis Ongkir Xtra participation fee
+    payment_processing_pct: 0.010 # 1.0% Biaya proses transaksi
+    total_effective_fee_pct: 0.09 # Total ~9% fee platform
+  campaigns:
+    payday_dates: [25, 26, 27]   # Tanggal Gajian promo
+    double_dates: ["09-09", "10-10", "11-11", "12-12"] # Festival Belanja Double Date
+    campaign_demand_boost: 1.6   # Multiplier demand saat campaign
+
+inventory_economics:
+  daily_holding_cost_rp: 350     # Biaya simpan gudang per unit per hari
+  stockout_penalty_rp: 15000     # Penalti kehilangan peluang & ranking pencarian Shopee
+  salvage_value_ratio: 0.40      # Nilai likuidasi / obral akhir periode (40% dari modal)
+  min_margin_pct: 0.15           # Batas bawah margin kotor (15%) agar tidak boncos
+  max_margin_pct: 0.85           # Batas atas margin kotor (85%) untuk vintage langka
+
+simulation:
+  time_horizon_days: 60          # Horizon evaluasi penjualan per siklus stok
+  random_seed: 42
+  num_episodes_train: 1000
+  num_episodes_eval: 200
+
+rl:
+  action_space:
+    # Persentase penyesuaian terhadap Harga Katalog / Harga Referensi
+    discrete_actions: [-0.20, -0.10, -0.05, 0.00, 0.05, 0.10, 0.20]
+  hyperparameters:
+    gamma: 0.98                  # Discount factor horizon terbatas
+    learning_rate: 0.05
+    epsilon_start: 1.0
+    epsilon_min: 0.05
+    epsilon_decay: 0.995
+    batch_size: 64
